@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boating Life Platform · 서버 기획안</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #132240;
+    --ocean: #0e4f7a;
+    --teal: #0d8a7c;
+    --sky: #4fb3d4;
+    --foam: #e8f6fb;
+    --sand: #f5f0e8;
+    --gold: #c8922a;
+    --text: #1a2535;
+    --muted: #5a6a80;
+    --light: #f8fafb;
+    --white: #ffffff;
+    --border: #dce8ef;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    line-height: 1.75;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: linear-gradient(160deg, var(--navy) 0%, var(--ocean) 60%, var(--teal) 100%);
+    color: white;
+    padding: 80px 60px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Cpath d='M0 30 Q25 10 50 30 Q75 50 100 30' stroke='rgba(255,255,255,0.04)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 45 Q25 25 50 45 Q75 65 100 45' stroke='rgba(255,255,255,0.03)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") repeat;
+  }
+  .cover-inner { position: relative; max-width: 860px; margin: 0 auto; }
+  .cover-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .cover h1 span { color: #7dd3ea; }
+  .cover-sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.75);
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .cover-meta-item { font-size: 13px; color: rgba(255,255,255,0.6); }
+  .cover-meta-item strong { color: white; display: block; font-size: 14px; margin-bottom: 2px; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 0 40px; }
+
+  /* ── NAV ── */
+  .toc {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toc-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .toc a {
+    display: block;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .toc a:hover { color: var(--ocean); border-bottom-color: var(--sky); }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--teal);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+  .section-desc {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 620px;
+    margin-bottom: 36px;
+  }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+  }
+  .card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .card-grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .card-text { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  .icon-blue { background: #e8f3fb; }
+  .icon-teal { background: #e0f4f1; }
+  .icon-gold { background: #fdf3e3; }
+  .icon-coral { background: #fdecea; }
+  .icon-purple { background: #f0eeff; }
+  .icon-green { background: #e5f6ec; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .flow-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-title .badge {
+    background: var(--foam);
+    color: var(--ocean);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -10px;
+    top: 18px;
+    font-size: 18px;
+    color: var(--sky);
+    z-index: 1;
+  }
+  .flow-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+    background: var(--foam);
+    border: 2px solid var(--sky);
+    color: var(--ocean);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .flow-label {
+    font-size: 12px;
+    color: var(--navy);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .flow-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 36px;
+    color: white;
+  }
+  .arch-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .arch-box .sub { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+  .arch-box.highlight { background: rgba(79,179,212,0.2); border-color: var(--sky); }
+  .arch-box.primary { background: rgba(13,138,124,0.25); border-color: var(--teal); }
+  .arch-box.dim { background: rgba(255,255,255,0.04); }
+
+  .arch-arrow {
+    text-align: center;
+    color: rgba(255,255,255,0.3);
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  .arch-label {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 20px;
+    letter-spacing: 0.08em;
+  }
+  .arch-divider {
+    border: none;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    margin: 20px 0;
+  }
+
+  /* ── FEATURE TABLE ── */
+  .feat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .feat-table th {
+    background: var(--navy);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .feat-table th:first-child { border-radius: 10px 0 0 0; }
+  .feat-table th:last-child { border-radius: 0 10px 0 0; }
+  .feat-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .feat-table tr:last-child td { border-bottom: none; }
+  .feat-table tr:nth-child(even) td { background: var(--light); }
+  .feat-table tr:hover td { background: var(--foam); }
+  .feat-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag-get { background: #e0f4ee; color: #0a6644; }
+  .tag-post { background: #fff3e0; color: #8a4500; }
+  .tag-patch { background: #e8f0fe; color: #1a4fa0; }
+  .tag-delete { background: #fdecea; color: #9b1c1c; }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .info-box.blue { background: var(--foam); border-left: 4px solid var(--sky); }
+  .info-box.teal { background: #e0f4f1; border-left: 4px solid var(--teal); }
+  .info-box.gold { background: #fdf3e3; border-left: 4px solid var(--gold); }
+  .info-box-icon { font-size: 20px; margin-top: 1px; }
+  .info-box-text { font-size: 14px; color: var(--text); line-height: 1.65; }
+  .info-box-text strong { color: var(--navy); }
+
+  /* ── SECURITY ── */
+  .sec-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-item:last-child { border-bottom: none; }
+  .sec-num {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    background: var(--navy);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .sec-content-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .sec-content-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── STATUS BADGE ── */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff8e5;
+    border: 1px solid #f0d070;
+    color: #7a5800;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* ── TWO-COL ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 640px) {
+    .two-col { grid-template-columns: 1fr; }
+    .cover { padding: 48px 24px; }
+    .container { padding: 0 20px; }
+    .toc-inner { padding: 0 20px; }
+    .flow-steps { gap: 12px; }
+    .flow-step:not(:last-child)::after { display: none; }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 32px;
+    font-size: 13px;
+  }
+  .footer strong { color: rgba(255,255,255,0.85); }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-tag">🚤 SERVER PLAN · BACKEND</div>
+    <h1>Boating Life<br><span>Platform</span> 서버 기획안</h1>
+    <p class="cover-sub">해양 레저 관광 활성화를 위한 AI 기반 보팅 라이프 플랫폼 — 서버 기능 설계 및 구조 기획</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><strong>담당</strong>백엔드 개발</div>
+      <div class="cover-meta-item"><strong>연동 서비스</strong>소셜 로그인 · 결제 · 지도 · 미디어</div>
+      <div class="cover-meta-item"><strong>상태</strong>기획 진행 중</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#overview">서비스 개요</a>
+    <a href="#structure">전체 구조</a>
+    <a href="#auth">로그인</a>
+    <a href="#features">주요 기능</a>
+    <a href="#flow">데이터 흐름</a>
+    <a href="#security">보안</a>
+    <a href="#infra">인프라</a>
+    <a href="#db">데이터 관리</a>
+  </div>
+</nav>
+
+<!-- 1. 서비스 개요 -->
+<section id="overview" class="section">
+  <div class="container">
+    <div class="section-label">01 · 서비스 개요</div>
+    <h2 class="section-title">어떤 서비스인가요?</h2>
+    <p class="section-desc">보팅 라이프 플랫폼은 보트 · 페리 · 요트 등 해양 레저를 즐기는 사람들을 위한 모바일 앱입니다. 서버는 앱이 정상적으로 작동하도록 데이터를 저장하고, 사용자를 인증하고, 결제를 처리하는 역할을 합니다.</p>
+
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <div class="card-icon icon-blue">📱</div>
+        <div class="card-title">모바일 앱 (프론트)</div>
+        <div class="card-text">사용자가 직접 보는 화면. Flutter로 제작하며 iOS · Android 모두 지원합니다. 다른 팀원 담당.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-teal">🖥️</div>
+        <div class="card-title">서버 (백엔드)</div>
+        <div class="card-text">앱의 요청을 받아 데이터를 처리하고 저장합니다. 본 기획안의 주요 대상입니다.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-gold">🗄️</div>
+        <div class="card-title">데이터베이스</div>
+        <div class="card-text">회원 정보, 게시글, 예약 · 결제 내역 등 모든 데이터를 안전하게 보관합니다.</div>
+      </div>
+    </div>
+
+    <br>
+
+    <div class="info-box blue">
+      <div class="info-box-icon">💡</div>
+      <div class="info-box-text">
+        <strong>역할 분리 원칙</strong><br>
+        앱(프론트)은 사용자 눈에 보이는 것, 서버(백엔드)는 눈에 보이지 않는 데이터 처리를 담당합니다. 예를 들어 사진 업로드 시 — 앱이 사진을 클라우드에 올리고, 서버는 그 사진 주소를 받아 데이터베이스에 기록하는 방식으로 역할을 나눕니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. 전체 구조 -->
+<section id="structure" class="section">
+  <div class="container">
+    <div class="section-label">02 · 전체 구조</div>
+    <h2 class="section-title">서버는 어떻게 구성되나요?</h2>
+    <p class="section-desc">앱과 서버, 외부 서비스들이 어떻게 연결되는지 보여주는 전체 구조도입니다.</p>
+
+    <div class="arch">
+      <div class="arch-row">
+        <div class="arch-box highlight" style="min-width:220px">
+          📱 모바일 앱 (Flutter)<br>
+          <div class="sub">사용자가 사용하는 화면 · 프론트팀 담당</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-label">HTTPS 암호화 통신</div>
+
+      <div class="arch-row">
+        <div class="arch-box primary" style="min-width:280px">
+          🖥️ 백엔드 서버 (Spring Boot)<br>
+          <div class="sub">요청 처리 · 로그인 검증 · 데이터 저장</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+
+      <div class="arch-row">
+        <div class="arch-box dim">
+          🗄️ 데이터베이스<br>
+          <div class="sub">회원 · 게시글 · 예약 · 결제</div>
+        </div>
+      </div>
+
+      <hr class="arch-divider">
+      <div class="arch-label">연동 외부 서비스</div>
+
+      <div class="arch-row">
+        <div class="arch-box dim">
+          🔐 소셜 로그인<br>
+          <div class="sub">구글 · 카카오</div>
+        </div>
+        <div class="arch-box dim">
+          🖼️ 이미지 저장소<br>
+          <div class="sub">Firebase Storage</div>
+        </div>
+        <div class="arch-box dim">
+          💳 결제<br>
+          <div class="sub">토스페이먼츠</div>
+        </div>
+        <div class="arch-box dim">
+          🗺️ 지도<br>
+          <div class="sub">Google Maps</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 로그인 -->
+<section id="auth" class="section">
+  <div class="container">
+    <div class="section-label">03 · 로그인 · 회원가입</div>
+    <h2 class="section-title">어떻게 로그인하나요?</h2>
+    <p class="section-desc">별도의 아이디 · 비밀번호 없이 구글 또는 카카오 계정으로 간편하게 가입하고 로그인할 수 있습니다.</p>
+
+    <div class="flow">
+      <div class="flow-title">
+        로그인 흐름
+        <span class="badge">소셜 로그인</span>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-dot">①</div>
+          <div class="flow-label">로그인 버튼 클릭</div>
+          <div class="flow-sub">구글 또는 카카오 선택</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">②</div>
+          <div class="flow-label">소셜 계정 인증</div>
+          <div class="flow-sub">해당 앱에서 처리</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">③</div>
+          <div class="flow-label">인증 토큰 발급</div>
+          <div class="flow-sub">신분증 역할</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">④</div>
+          <div class="flow-label">서버 검증</div>
+          <div class="flow-sub">토큰이 진짜인지 확인</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">⑤</div>
+          <div class="flow-label">회원 확인</div>
+          <div class="flow-sub">신규면 자동 가입</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">⑥</div>
+          <div class="flow-label">로그인 완료</div>
+          <div class="flow-sub">앱 진입</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box teal">
+      <div class="info-box-icon">🔑</div>
+      <div class="info-box-text">
+        <strong>토큰(Token)이란?</strong><br>
+        로그인 후 서버가 발급하는 디지털 신분증입니다. 앱은 이후 모든 요청에 이 토큰을 함께 보내고, 서버는 토큰을 확인해 "진짜 우리 회원인지" 검증합니다. 토큰이 없거나 유효하지 않으면 서버가 요청을 거부합니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. 주요 기능 -->
+<section id="features" class="section">
+  <div class="container">
+    <div class="section-label">04 · 주요 기능</div>
+    <h2 class="section-title">서버가 제공하는 기능</h2>
+    <p class="section-desc">서버는 앱의 요청을 받아 아래 기능들을 처리합니다. 기능별로 어떤 동작을 지원하는지 정리했습니다.</p>
+
+    <div class="card-grid card-grid-2" style="margin-bottom:24px">
+
+      <div class="card">
+        <div class="card-icon icon-blue">👤</div>
+        <div class="card-title">회원 관리</div>
+        <div class="card-text">
+          프로필 조회 및 수정, 닉네임 · 소개 · 프로필 사진 변경을 지원합니다. 다른 사용자의 프로필도 조회할 수 있습니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-teal">📸</div>
+        <div class="card-title">SNS 피드 · 게시글</div>
+        <div class="card-text">
+          해양 레저 경험을 사진 · 글로 공유합니다. 게시글 작성 · 수정 · 삭제, 피드 조회(최신순), 특정 스팟 게시글 모아보기를 지원합니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-gold">💬</div>
+        <div class="card-title">댓글 · 좋아요</div>
+        <div class="card-text">
+          게시글에 댓글을 달고 좋아요를 누를 수 있습니다. 본인 댓글만 수정 · 삭제 가능하며, 좋아요는 한 번 더 누르면 취소됩니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-purple">🗺️</div>
+        <div class="card-title">해양 레저 스팟</div>
+        <div class="card-text">
+          보트 · 페리 · 요트 등 스팟 정보를 제공합니다. 지도 기반으로 현재 위치 주변 스팟을 반경 검색하고, 상세 정보를 확인할 수 있습니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-coral">📅</div>
+        <div class="card-title">예약</div>
+        <div class="card-text">
+          원하는 스팟을 날짜 · 시간에 맞춰 예약합니다. 예약 내역 조회 및 취소가 가능합니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-green">💳</div>
+        <div class="card-title">결제 (토스페이먼츠)</div>
+        <div class="card-text">
+          예약 후 토스페이먼츠로 안전하게 결제합니다. 서버에서 결제 금액을 이중 검증하여 위변조를 방지하고, 결제 취소도 지원합니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-blue">📍</div>
+        <div class="card-title">위치 · 트래킹</div>
+        <div class="card-text">
+          사용자의 현재 위치를 기록하고 이동 이력을 저장합니다. 항해 경로 기록 등 해양 레저 활동에 특화된 기능을 지원합니다.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-teal">🖼️</div>
+        <div class="card-title">이미지 업로드</div>
+        <div class="card-text">
+          사진은 앱에서 클라우드(Firebase)에 직접 업로드되고, 서버는 해당 사진 주소만 받아 저장합니다. 서버 부하를 줄이는 효율적인 방식입니다.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Feature detail table -->
+    <p style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px;">기능 상세 목록</p>
+    <div class="feat-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr>
+            <th>기능 영역</th>
+            <th>동작</th>
+            <th>방식</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2"><strong>회원</strong></td>
+            <td>자동 가입</td>
+            <td><span class="tag tag-post">등록</span></td>
+            <td>최초 소셜 로그인 시 자동으로 회원 생성</td>
+          </tr>
+          <tr>
+            <td>프로필 수정</td>
+            <td><span class="tag tag-patch">수정</span></td>
+            <td>닉네임, 소개글, 프로필 사진 URL 변경</td>
+          </tr>
+          <tr>
+            <td rowspan="4"><strong>게시글</strong></td>
+            <td>피드 조회</td>
+            <td><span class="tag tag-get">조회</span></td>
+            <td>전체 게시글을 최신순으로 20개씩 불러옴</td>
+          </tr>
+          <tr>
+            <td>게시글 작성</td>
+            <td><span class="tag tag-post">등록</span></td>
+            <td>텍스트 + 이미지 URL + 위치 정보 저장</td>
+          </tr>
+          <tr>
+            <td>게시글 수정</td>
+            <td><span class="tag tag-patch">수정</span></td>
+            <td>본인이 작성한 게시글만 수정 가능</td>
+          </tr>
+          <tr>
+            <td>게시글 삭제</td>
+            <td><span class="tag tag-delete">삭제</span></td>
+            <td>본인이 작성한 게시글만 삭제 가능</td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>댓글</strong></td>
+            <td>댓글 작성</td>
+            <td><span class="tag tag-post">등록</span></td>
+            <td>게시글에 댓글 추가</td>
+          </tr>
+          <tr>
+            <td>댓글 삭제</td>
+            <td><span class="tag tag-delete">삭제</span></td>
+            <td>본인 댓글만 삭제 가능</td>
+          </tr>
+          <tr>
+            <td><strong>좋아요</strong></td>
+            <td>좋아요 토글</td>
+            <td><span class="tag tag-post">등록</span></td>
+            <td>누르면 추가, 다시 누르면 취소</td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>스팟</strong></td>
+            <td>주변 스팟 검색</td>
+            <td><span class="tag tag-get">조회</span></td>
+            <td>현재 위치 기준 반경 내 스팟 목록 반환</td>
+          </tr>
+          <tr>
+            <td>스팟 상세</td>
+            <td><span class="tag tag-get">조회</span></td>
+            <td>스팟 이름, 종류, 설명, 위치 정보 제공</td>
+          </tr>
+          <tr>
+            <td><strong>예약</strong></td>
+            <td>예약 생성 / 취소</td>
+            <td><span class="tag tag-post">등록</span></td>
+            <td>날짜 · 인원 예약, 취소 요청 처리</td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>결제</strong></td>
+            <td>결제 승인</td>
+            <td><span class="tag tag-post">등록</span></td>
+            <td>토스페이먼츠 결제 검증 후 DB에 결제 완료 기록</td>
+          </tr>
+          <tr>
+            <td>결제 취소</td>
+            <td><span class="tag tag-delete">삭제</span></td>
+            <td>취소 요청 후 환불 처리</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 5. 데이터 흐름 -->
+<section id="flow" class="section">
+  <div class="container">
+    <div class="section-label">05 · 데이터 흐름</div>
+    <h2 class="section-title">데이터는 어떻게 이동하나요?</h2>
+    <p class="section-desc">주요 기능별로 데이터가 어디서 출발해서 어디에 저장되는지 흐름을 보여줍니다.</p>
+
+    <div class="flow">
+      <div class="flow-title">📸 사진 게시글 올리기 <span class="badge">SNS 피드</span></div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-dot">①</div>
+          <div class="flow-label">사진 선택</div>
+          <div class="flow-sub">앱에서 갤러리 선택</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">②</div>
+          <div class="flow-label">이미지 업로드</div>
+          <div class="flow-sub">Firebase 클라우드로 직접 전송</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">③</div>
+          <div class="flow-label">사진 주소 수신</div>
+          <div class="flow-sub">업로드 완료 후 URL 반환</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">④</div>
+          <div class="flow-label">게시글 전송</div>
+          <div class="flow-sub">글 내용 + 사진 주소 서버로 전달</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">⑤</div>
+          <div class="flow-label">데이터베이스 저장</div>
+          <div class="flow-sub">서버가 DB에 최종 저장</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-title">💳 예약 및 결제하기 <span class="badge">Toss Payments</span></div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-dot">①</div>
+          <div class="flow-label">예약 요청</div>
+          <div class="flow-sub">날짜 · 인원 선택</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">②</div>
+          <div class="flow-label">주문 생성</div>
+          <div class="flow-sub">서버가 주문번호 발급</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">③</div>
+          <div class="flow-label">결제 진행</div>
+          <div class="flow-sub">토스 결제 화면</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">④</div>
+          <div class="flow-label">결제 검증</div>
+          <div class="flow-sub">서버 ↔ 토스 이중 확인</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">⑤</div>
+          <div class="flow-label">결제 완료</div>
+          <div class="flow-sub">DB에 완료 기록</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-title">🗺️ 주변 스팟 찾기 <span class="badge">위치 기반 검색</span></div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-dot">①</div>
+          <div class="flow-label">현재 위치 전송</div>
+          <div class="flow-sub">GPS 좌표</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">②</div>
+          <div class="flow-label">반경 계산</div>
+          <div class="flow-sub">서버에서 거리 계산</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">③</div>
+          <div class="flow-label">DB 검색</div>
+          <div class="flow-sub">반경 내 스팟 조회</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">④</div>
+          <div class="flow-label">결과 반환</div>
+          <div class="flow-sub">스팟 목록 앱으로 전달</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-dot">⑤</div>
+          <div class="flow-label">지도 표시</div>
+          <div class="flow-sub">앱에서 핀 마크 렌더링</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 6. 보안 -->
+<section id="security" class="section">
+  <div class="container">
+    <div class="section-label">06 · 보안</div>
+    <h2 class="section-title">어떻게 안전하게 보호하나요?</h2>
+    <p class="section-desc">사용자 데이터와 결제 정보를 보호하기 위해 여러 겹의 보안 장치를 적용합니다.</p>
+
+    <div class="card" style="padding:28px">
+      <div class="sec-item">
+        <div class="sec-num">1</div>
+        <div>
+          <div class="sec-content-title">모든 통신 암호화 (HTTPS)</div>
+          <div class="sec-content-desc">앱과 서버 간 모든 데이터를 암호화해 전송합니다. 중간에 누군가 가로채도 내용을 볼 수 없습니다.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-num">2</div>
+        <div>
+          <div class="sec-content-title">로그인 토큰 검증</div>
+          <div class="sec-content-desc">모든 API 요청에 로그인 토큰이 필요합니다. 토큰이 없거나 유효하지 않으면 요청이 자동으로 거부됩니다.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-num">3</div>
+        <div>
+          <div class="sec-content-title">본인 인증 (권한 검증)</div>
+          <div class="sec-content-desc">게시글·댓글 수정 및 삭제는 작성자 본인만 가능합니다. 다른 사람이 타인의 글을 수정할 수 없습니다.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-num">4</div>
+        <div>
+          <div class="sec-content-title">결제 금액 이중 검증</div>
+          <div class="sec-content-desc">결제 완료 직전, 서버가 토스페이먼츠에 직접 금액을 확인합니다. 앱에서 금액을 임의 변조해도 서버에서 차단됩니다.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-num">5</div>
+        <div>
+          <div class="sec-content-title">민감 정보 별도 관리</div>
+          <div class="sec-content-desc">각종 API 비밀키는 코드에 포함시키지 않고 별도 보안 저장소(AWS Secrets Manager)에 보관합니다. 소스코드가 외부에 노출되어도 키는 유출되지 않습니다.</div>
+        </div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-num">6</div>
+        <div>
+          <div class="sec-content-title">앱 전용 접근 제한 (CORS)</div>
+          <div class="sec-content-desc">우리 앱에서 보낸 요청만 수락합니다. 외부 웹사이트나 다른 앱에서 무단으로 API를 호출하는 것을 방지합니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. 인프라 -->
+<section id="infra" class="section">
+  <div class="container">
+    <div class="section-label">07 · 인프라 · 배포</div>
+    <h2 class="section-title">서버는 어디서 운영되나요?</h2>
+    <p class="section-desc">Amazon Web Services(AWS) 클라우드 위에서 서버와 데이터베이스를 운영합니다.</p>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-icon icon-blue">☁️</div>
+        <div class="card-title">서버 컴퓨터 (EC2)</div>
+        <div class="card-text">실제 서버 프로그램이 실행되는 클라우드 컴퓨터입니다. 24시간 365일 항상 켜져 있어 언제든 요청에 응답합니다.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-teal">🗄️</div>
+        <div class="card-title">데이터베이스 서버 (RDS)</div>
+        <div class="card-text">회원 · 게시글 · 예약 · 결제 데이터를 저장하는 전용 데이터베이스 서버입니다. 자동 백업 기능을 제공합니다.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-gold">🌐</div>
+        <div class="card-title">도메인 · 트래픽 분산</div>
+        <div class="card-text">사용자 요청을 서버로 안전하게 연결하고, 사용자가 많아질 경우 자동으로 부하를 분산합니다.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-coral">🔒</div>
+        <div class="card-title">보안 키 보관소</div>
+        <div class="card-text">결제 API 키, 데이터베이스 비밀번호 등 민감한 정보를 별도 보안 금고에 보관합니다.</div>
+      </div>
+    </div>
+
+    <br>
+    <div class="info-box gold">
+      <div class="info-box-icon">📦</div>
+      <div class="info-box-text">
+        <strong>연동 외부 서비스 요약</strong><br>
+        소셜 로그인(구글·카카오), 이미지 저장소(Firebase), 결제(토스페이먼츠), 지도(Google Maps) 등 각 분야 전문 서비스를 연동하여 안정성을 높이고 개발 기간을 단축합니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. 데이터 관리 -->
+<section id="db" class="section">
+  <div class="container">
+    <div class="section-label">08 · 데이터 관리</div>
+    <h2 class="section-title">어떤 데이터를 저장하나요?</h2>
+    <p class="section-desc">서비스 운영에 필요한 데이터를 항목별로 분류해 저장합니다. ERD(상세 구조도)는 별도 문서로 정리 예정입니다.</p>
+
+    <div class="status" style="margin-bottom:20px">ERD 상세 문서 — 프론트엔드 설계 확정 후 업데이트 예정</div>
+
+    <div class="feat-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr>
+            <th>저장 항목</th>
+            <th>포함 정보</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>👤 회원 정보</strong></td>
+            <td>닉네임, 이메일, 프로필 사진 주소, 로그인 방식(구글/카카오)</td>
+            <td>비밀번호 미저장 (소셜 로그인)</td>
+          </tr>
+          <tr>
+            <td><strong>📸 게시글</strong></td>
+            <td>글 내용, 연결된 스팟, 작성 위치 좌표, 작성일</td>
+            <td>이미지는 URL만 저장</td>
+          </tr>
+          <tr>
+            <td><strong>🖼️ 게시글 이미지</strong></td>
+            <td>이미지 클라우드 주소(URL), 순서</td>
+            <td>실제 이미지는 Firebase에 저장</td>
+          </tr>
+          <tr>
+            <td><strong>💬 댓글</strong></td>
+            <td>댓글 내용, 작성자, 게시글 연결 정보</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>❤️ 좋아요</strong></td>
+            <td>누른 사용자, 게시글 연결 정보</td>
+            <td>중복 방지</td>
+          </tr>
+          <tr>
+            <td><strong>🏖️ 레저 스팟</strong></td>
+            <td>스팟 이름, 종류(보트/페리/요트), 위치 좌표, 설명</td>
+            <td>관리자만 등록 가능</td>
+          </tr>
+          <tr>
+            <td><strong>📅 예약 내역</strong></td>
+            <td>예약자, 스팟, 날짜·시간, 인원, 상태(예약중/취소)</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>💳 결제 내역</strong></td>
+            <td>예약 연결 정보, 결제 금액, 상태(완료/취소)</td>
+            <td>카드번호 등 민감정보 미저장</td>
+          </tr>
+          <tr>
+            <td><strong>📍 위치 이력</strong></td>
+            <td>사용자 위치 좌표, 기록 시각</td>
+            <td>항해 경로 추적용</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <br>
+    <div class="info-box blue">
+      <div class="info-box-icon">🔐</div>
+      <div class="info-box-text">
+        <strong>개인정보 보호 원칙</strong><br>
+        비밀번호는 저장하지 않습니다 (소셜 로그인 사용). 결제 카드번호 등 금융 민감 정보는 토스페이먼츠에서만 관리하며, 우리 서버에는 저장되지 않습니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <strong>Boating Life Platform</strong> · 백엔드 서버 기획안<br>
+  ERD 상세 설계 문서 → <a href="./ERD.md" style="color:rgba(255,255,255,0.5)">ERD.md</a> · 기술 상세 문서 → <a href="./SERVER_DESIGN.md" style="color:rgba(255,255,255,0.5)">SERVER_DESIGN.md</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERD 테이블 레퍼런스</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8e6f0;
+    --muted: #7a788a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Pretendard', -apple-system, sans-serif;
+
+    --user:    #8b7cf6;
+    --product: #34d399;
+    --reserve: #fb923c;
+    --payment: #fbbf24;
+    --review:  #60a5fa;
+    --post:    #f472b6;
+    --system:  #94a3b8;
+
+    --user-bg:    rgba(139,124,246,0.08);
+    --product-bg: rgba(52,211,153,0.08);
+    --reserve-bg: rgba(251,146,60,0.08);
+    --payment-bg: rgba(251,191,36,0.08);
+    --review-bg:  rgba(96,165,250,0.08);
+    --post-bg:    rgba(244,114,182,0.08);
+    --system-bg:  rgba(148,163,184,0.08);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .nav {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .nav-logo {
+    padding: 0 20px 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .nav-group-label {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--text); border-left-color: var(--accent, #fff); background: rgba(255,255,255,0.04); }
+
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Main ── */
+  .main {
+    flex: 1;
+    padding: 48px 52px;
+    max-width: 900px;
+  }
+
+  .page-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .page-heading {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+
+  /* ── Table section ── */
+  .tbl-section {
+    margin-bottom: 48px;
+    scroll-margin-top: 32px;
+  }
+
+  .tbl-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .tbl-accent {
+    width: 3px;
+    height: 20px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .tbl-name {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .tbl-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    padding-left: 15px;
+    line-height: 1.7;
+  }
+
+  .tbl-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    table-layout: fixed;
+  }
+
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border2);
+  }
+
+  th {
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  th:nth-child(1) { width: 26%; }
+  th:nth-child(2) { width: 16%; }
+  th:nth-child(3) { width: 9%; }
+  th:nth-child(4) { width: 49%; }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  .col-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .col-type {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .badge-pk { background: rgba(139,124,246,0.2); color: #a89df7; }
+  .badge-fk { background: rgba(52,211,153,0.15); color: #5ecea0; }
+
+  .col-desc {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="nav">
+    <div class="nav-logo">ERD Reference</div>
+
+    <div class="nav-group-label">회원</div>
+    <a class="nav-item" href="#USER" style="--accent: var(--user)"><span class="nav-dot" style="background:var(--user)"></span>USER</a>
+    <a class="nav-item" href="#NOTIFICATION_SETTING" style="--accent: var(--user)"><span class="nav-dot" style="background:var(--user)"></span>NOTIFICATION_SETTING</a>
+    <a class="nav-item" href="#LANGUAGE_SETTING" style="--accent: var(--user)"><span class="nav-dot" style="background:var(--user)"></span>LANGUAGE_SETTING</a>
+    <a class="nav-item" href="#VESSEL_LOG" style="--accent: var(--user)"><span class="nav-dot" style="background:var(--user)"></span>VESSEL_LOG</a>
+
+    <div class="nav-group-label" style="margin-top:8px">상품</div>
+    <a class="nav-item" href="#PRODUCT" style="--accent: var(--product)"><span class="nav-dot" style="background:var(--product)"></span>PRODUCT</a>
+    <a class="nav-item" href="#PRODUCT_TAG" style="--accent: var(--product)"><span class="nav-dot" style="background:var(--product)"></span>PRODUCT_TAG</a>
+
+    <div class="nav-group-label" style="margin-top:8px">예약 · 결제</div>
+    <a class="nav-item" href="#RESERVATION" style="--accent: var(--reserve)"><span class="nav-dot" style="background:var(--reserve)"></span>RESERVATION</a>
+    <a class="nav-item" href="#PAYMENT" style="--accent: var(--payment)"><span class="nav-dot" style="background:var(--payment)"></span>PAYMENT</a>
+
+    <div class="nav-group-label" style="margin-top:8px">리뷰</div>
+    <a class="nav-item" href="#REVIEW" style="--accent: var(--review)"><span class="nav-dot" style="background:var(--review)"></span>REVIEW</a>
+
+    <div class="nav-group-label" style="margin-top:8px">게시판</div>
+    <a class="nav-item" href="#POST" style="--accent: var(--post)"><span class="nav-dot" style="background:var(--post)"></span>POST</a>
+    <a class="nav-item" href="#POST_HASHTAG" style="--accent: var(--post)"><span class="nav-dot" style="background:var(--post)"></span>POST_HASHTAG</a>
+    <a class="nav-item" href="#COMMENT" style="--accent: var(--post)"><span class="nav-dot" style="background:var(--post)"></span>COMMENT</a>
+
+    <div class="nav-group-label" style="margin-top:8px">운영</div>
+    <a class="nav-item" href="#REPORT" style="--accent: var(--system)"><span class="nav-dot" style="background:var(--system)"></span>REPORT</a>
+    <a class="nav-item" href="#INQUIRY" style="--accent: var(--system)"><span class="nav-dot" style="background:var(--system)"></span>INQUIRY</a>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">Database Schema</div>
+    <div class="page-heading">테이블 컬럼 레퍼런스</div>
+    <div class="page-sub">14개 테이블 · 전체 컬럼 역할 설명</div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="badge badge-pk">PK</span> 기본 키 (Primary Key)</div>
+      <div class="legend-item"><span class="badge badge-fk">FK</span> 외래 키 (Foreign Key)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--user)"></span> 회원</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--product)"></span> 상품</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--reserve)"></span> 예약</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--payment)"></span> 결제</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--review)"></span> 리뷰</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--post)"></span> 게시판</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--system)"></span> 운영</div>
+    </div>
+
+    <!-- USER -->
+    <div class="tbl-section" id="USER">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--user)"></div>
+        <div class="tbl-name" style="color:var(--user)">USER</div>
+      </div>
+      <div class="tbl-desc">서비스에 가입한 회원 정보를 저장하는 핵심 테이블. 인증·프로필·누적 통계를 포함합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">회원 고유 식별자. 내부 참조에 사용됩니다.</td></tr>
+            <tr><td><span class="col-name">email</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">로그인에 사용되는 이메일 주소. UNIQUE 제약이 필요합니다.</td></tr>
+            <tr><td><span class="col-name">password_hash</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">비밀번호를 bcrypt 등으로 해시한 값. 평문 저장 절대 금지.</td></tr>
+            <tr><td><span class="col-name">member_code</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">사람이 읽기 쉬운 회원 코드 (예: USR-00123). 고객센터 식별용.</td></tr>
+            <tr><td><span class="col-name">birth_date</span></td><td><span class="col-type">date</span></td><td></td><td class="col-desc">생년월일. 연령 인증이나 마케팅 세그먼트에 활용합니다.</td></tr>
+            <tr><td><span class="col-name">phone</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">전화번호. SMS 인증·알림 발송에 사용됩니다.</td></tr>
+            <tr><td><span class="col-name">joined_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">회원 가입 일시. 자동 설정 (DEFAULT NOW()).</td></tr>
+            <tr><td><span class="col-name">profile_image</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">프로필 이미지 URL 또는 파일 경로.</td></tr>
+            <tr><td><span class="col-name">language</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">선호 언어 코드 (kor / eng). UI 언어 전환에 사용.</td></tr>
+            <tr><td><span class="col-name">accumulated_sailing_hours</span></td><td><span class="col-type">float</span></td><td></td><td class="col-desc">누적 항해 시간. VESSEL_LOG에서 집계하거나 트리거로 갱신.</td></tr>
+            <tr><td><span class="col-name">accumulated_distance</span></td><td><span class="col-type">float</span></td><td></td><td class="col-desc">누적 항해 거리(km). VESSEL_LOG에서 집계하거나 트리거로 갱신.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION_SETTING -->
+    <div class="tbl-section" id="NOTIFICATION_SETTING">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--user)"></div>
+        <div class="tbl-name" style="color:var(--user)">NOTIFICATION_SETTING</div>
+      </div>
+      <div class="tbl-desc">회원별 알림 수신 설정. USER와 1:1 관계이며, 채널별 on/off를 관리합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">설정 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 어떤 회원의 설정인지 나타냅니다.</td></tr>
+            <tr><td><span class="col-name">push_enabled</span></td><td><span class="col-type">bool</span></td><td></td><td class="col-desc">앱 푸시 알림 수신 여부.</td></tr>
+            <tr><td><span class="col-name">email_enabled</span></td><td><span class="col-type">bool</span></td><td></td><td class="col-desc">이메일 알림 수신 여부.</td></tr>
+            <tr><td><span class="col-name">sms_enabled</span></td><td><span class="col-type">bool</span></td><td></td><td class="col-desc">SMS 알림 수신 여부.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LANGUAGE_SETTING -->
+    <div class="tbl-section" id="LANGUAGE_SETTING">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--user)"></div>
+        <div class="tbl-name" style="color:var(--user)">LANGUAGE_SETTING</div>
+      </div>
+      <div class="tbl-desc">언어 설정을 별도 테이블로 분리해 다국어 확장을 유연하게 지원합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">설정 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조.</td></tr>
+            <tr><td><span class="col-name">locale</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">언어 로케일 코드 (예: ko-KR, en-US).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VESSEL_LOG -->
+    <div class="tbl-section" id="VESSEL_LOG">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--user)"></div>
+        <div class="tbl-name" style="color:var(--user)">VESSEL_LOG</div>
+      </div>
+      <div class="tbl-desc">회원의 항해 기록을 저장합니다. 누적 시간·거리 집계의 원천 데이터입니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">항해 기록 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 누구의 항해인지 나타냅니다.</td></tr>
+            <tr><td><span class="col-name">started_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">항해 시작 일시.</td></tr>
+            <tr><td><span class="col-name">ended_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">항해 종료 일시.</td></tr>
+            <tr><td><span class="col-name">distance_km</span></td><td><span class="col-type">float</span></td><td></td><td class="col-desc">이번 항해에서 이동한 거리(km).</td></tr>
+            <tr><td><span class="col-name">duration_hours</span></td><td><span class="col-type">float</span></td><td></td><td class="col-desc">이번 항해 소요 시간(시간 단위).</td></tr>
+            <tr><td><span class="col-name">route_description</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">항해 경로나 메모를 자유 텍스트로 기록합니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCT -->
+    <div class="tbl-section" id="PRODUCT">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--product)"></div>
+        <div class="tbl-name" style="color:var(--product)">PRODUCT</div>
+      </div>
+      <div class="tbl-desc">예약 가능한 항해 상품 정보입니다. 태그는 PRODUCT_TAG에 분리 저장됩니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">상품 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">name</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">상품명.</td></tr>
+            <tr><td><span class="col-name">description</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">상품 상세 설명.</td></tr>
+            <tr><td><span class="col-name">duration_minutes</span></td><td><span class="col-type">int</span></td><td></td><td class="col-desc">상품 이용 소요 시간(분).</td></tr>
+            <tr><td><span class="col-name">address</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">출발/집결 장소 주소.</td></tr>
+            <tr><td><span class="col-name">base_price</span></td><td><span class="col-type">decimal</span></td><td></td><td class="col-desc">기본 이용 요금. 인원 수에 따라 결제 시 계산됩니다.</td></tr>
+            <tr><td><span class="col-name">provided_items</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">제공 물품 목록 (예: 구명조끼, 낚싯대 등).</td></tr>
+            <tr><td><span class="col-name">avg_rating</span></td><td><span class="col-type">float</span></td><td></td><td class="col-desc">리뷰 별점 평균. REVIEW 집계값으로 주기적으로 갱신합니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCT_TAG -->
+    <div class="tbl-section" id="PRODUCT_TAG">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--product)"></div>
+        <div class="tbl-name" style="color:var(--product)">PRODUCT_TAG</div>
+      </div>
+      <div class="tbl-desc">상품에 붙은 해시태그를 1행 1태그로 저장합니다. 검색·필터링에 활용됩니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">태그 행 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">product_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">PRODUCT.id 참조.</td></tr>
+            <tr><td><span class="col-name">tag</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">태그 문자열 (예: #낚시, #석양크루즈).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RESERVATION -->
+    <div class="tbl-section" id="RESERVATION">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--reserve)"></div>
+        <div class="tbl-name" style="color:var(--reserve)">RESERVATION</div>
+      </div>
+      <div class="tbl-desc">회원이 상품을 예약한 내역입니다. 결제와 1:1로 연결되며, 리뷰의 기준 단위가 됩니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">예약 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 예약한 회원.</td></tr>
+            <tr><td><span class="col-name">product_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">PRODUCT.id 참조. 어떤 상품을 예약했는지.</td></tr>
+            <tr><td><span class="col-name">payment_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">PAYMENT.id 참조. 이 예약에 연결된 결제.</td></tr>
+            <tr><td><span class="col-name">reserved_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">예약 일시 (실제 이용 날짜+시간).</td></tr>
+            <tr><td><span class="col-name">seat_number</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">배정된 좌석 번호.</td></tr>
+            <tr><td><span class="col-name">headcount</span></td><td><span class="col-type">int</span></td><td></td><td class="col-desc">예약 인원 수.</td></tr>
+            <tr><td><span class="col-name">status</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">예약 상태 (pending / confirmed / cancelled / completed).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="tbl-section" id="PAYMENT">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--payment)"></div>
+        <div class="tbl-name" style="color:var(--payment)">PAYMENT</div>
+      </div>
+      <div class="tbl-desc">결제 내역을 기록합니다. 예약과 1:1로 연결되며, 환불·취소 이력도 status로 관리합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">결제 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 결제한 회원.</td></tr>
+            <tr><td><span class="col-name">product_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">PRODUCT.id 참조. 결제 대상 상품.</td></tr>
+            <tr><td><span class="col-name">amount</span></td><td><span class="col-type">decimal</span></td><td></td><td class="col-desc">실 결제 금액.</td></tr>
+            <tr><td><span class="col-name">method</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">결제 수단 (카드 / 계좌이체 / 간편결제 등).</td></tr>
+            <tr><td><span class="col-name">paid_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">결제 완료 일시.</td></tr>
+            <tr><td><span class="col-name">status</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">결제 상태 (paid / refunded / failed).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REVIEW -->
+    <div class="tbl-section" id="REVIEW">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--review)"></div>
+        <div class="tbl-name" style="color:var(--review)">REVIEW</div>
+      </div>
+      <div class="tbl-desc">실제 예약을 완료한 회원만 리뷰를 작성할 수 있도록 reservation_id로 검증합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">리뷰 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 리뷰 작성자.</td></tr>
+            <tr><td><span class="col-name">product_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">PRODUCT.id 참조. 어떤 상품에 대한 리뷰인지.</td></tr>
+            <tr><td><span class="col-name">reservation_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">RESERVATION.id 참조. 허위 리뷰 방지를 위한 예약 검증.</td></tr>
+            <tr><td><span class="col-name">rating</span></td><td><span class="col-type">int</span></td><td></td><td class="col-desc">별점 (1~5). PRODUCT.avg_rating 집계에 사용됩니다.</td></tr>
+            <tr><td><span class="col-name">content</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">리뷰 본문 텍스트.</td></tr>
+            <tr><td><span class="col-name">created_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">리뷰 작성 일시.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POST -->
+    <div class="tbl-section" id="POST">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--post)"></div>
+        <div class="tbl-name" style="color:var(--post)">POST</div>
+      </div>
+      <div class="tbl-desc">회원이 작성하는 게시글입니다. 해시태그는 POST_HASHTAG, 댓글은 COMMENT에 분리 저장됩니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">게시글 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 게시글 작성자.</td></tr>
+            <tr><td><span class="col-name">title</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">게시글 제목.</td></tr>
+            <tr><td><span class="col-name">body</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">게시글 본문.</td></tr>
+            <tr><td><span class="col-name">posted_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">게시글 등록 일시.</td></tr>
+            <tr><td><span class="col-name">like_count</span></td><td><span class="col-type">int</span></td><td></td><td class="col-desc">관심(좋아요) 수. 별도 LIKE 테이블로 분리하면 중복 방지 가능.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POST_HASHTAG -->
+    <div class="tbl-section" id="POST_HASHTAG">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--post)"></div>
+        <div class="tbl-name" style="color:var(--post)">POST_HASHTAG</div>
+      </div>
+      <div class="tbl-desc">게시글에 붙은 해시태그를 행 단위로 저장합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">태그 행 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">post_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">POST.id 참조.</td></tr>
+            <tr><td><span class="col-name">tag</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">태그 문자열 (예: #항해일지).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMMENT -->
+    <div class="tbl-section" id="COMMENT">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--post)"></div>
+        <div class="tbl-name" style="color:var(--post)">COMMENT</div>
+      </div>
+      <div class="tbl-desc">게시글에 달리는 댓글입니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">댓글 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">post_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">POST.id 참조.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 댓글 작성자.</td></tr>
+            <tr><td><span class="col-name">content</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">댓글 내용.</td></tr>
+            <tr><td><span class="col-name">created_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">댓글 작성 일시.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="tbl-section" id="REPORT">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--system)"></div>
+        <div class="tbl-name" style="color:var(--system)">REPORT</div>
+      </div>
+      <div class="tbl-desc">게시글 신고 내역입니다. 운영자가 처리 여부를 is_resolved로 관리합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">신고 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">post_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">POST.id 참조. 신고된 게시글.</td></tr>
+            <tr><td><span class="col-name">reporter_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 신고한 회원.</td></tr>
+            <tr><td><span class="col-name">reason</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">신고 사유 텍스트.</td></tr>
+            <tr><td><span class="col-name">reported_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">신고 접수 일시.</td></tr>
+            <tr><td><span class="col-name">is_resolved</span></td><td><span class="col-type">bool</span></td><td></td><td class="col-desc">운영자 처리 완료 여부 (false = 미처리, true = 처리됨).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INQUIRY -->
+    <div class="tbl-section" id="INQUIRY">
+      <div class="tbl-header">
+        <div class="tbl-accent" style="background:var(--system)"></div>
+        <div class="tbl-name" style="color:var(--system)">INQUIRY</div>
+      </div>
+      <div class="tbl-desc">고객센터 문의 내역입니다. 운영자 답변과 처리 여부를 함께 관리합니다.</div>
+      <div class="tbl-card">
+        <table>
+          <thead><tr><th>컬럼명</th><th>타입</th><th>키</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="col-name">id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-pk">PK</span></td><td class="col-desc">문의 고유 식별자.</td></tr>
+            <tr><td><span class="col-name">user_id</span></td><td><span class="col-type">uuid</span></td><td><span class="badge badge-fk">FK</span></td><td class="col-desc">USER.id 참조. 문의한 회원.</td></tr>
+            <tr><td><span class="col-name">content</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">문의 내용.</td></tr>
+            <tr><td><span class="col-name">created_at</span></td><td><span class="col-type">timestamp</span></td><td></td><td class="col-desc">문의 등록 일시.</td></tr>
+            <tr><td><span class="col-name">answer</span></td><td><span class="col-type">string</span></td><td></td><td class="col-desc">운영자 답변 내용. 미답변 시 NULL.</td></tr>
+            <tr><td><span class="col-name">is_answered</span></td><td><span class="col-type">bool</span></td><td></td><td class="col-desc">답변 완료 여부 (false = 대기중, true = 답변완료).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const items = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.tbl-section');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        items.forEach(i => i.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+
+  items.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
