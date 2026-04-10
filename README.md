@@ -6,7 +6,7 @@
 ## 🔗 Interactive Documents
 시각적으로 최적화된 상세 기획안과 설계 문서를 확인하실 수 있습니다.
 
-* **[📄 서버 상세 기획안 (HTML)](https://kthees.github.io/html/server_plan.html)**
+* **[📄 서버 상세 기획안 (HTML)](./html/server_plan.html)**
 * **[📊 ERD 상세 설계 문서](./ERD.md)**
 * **[⚙️ 기술 상세 사양서](./Server_Design.md)**
 

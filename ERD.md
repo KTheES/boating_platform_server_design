@@ -9,6 +9,8 @@
 
 > **문서 유형**: 데이터베이스 설계 (ERD)
 > **연동 문서**: [서버 설계 문서](./SERVER_DESIGN.md) | [ERD HTML download](./html/erd_table_reference.html)
+
+
 > **상태**: 🚧 초안 (프론트엔드 화면 확정 전 — 변경 가능)
 
 ---
