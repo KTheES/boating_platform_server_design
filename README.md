@@ -44,10 +44,10 @@
 
 ---
 
-## 🏗 Architecture
+## Architecture
 이 프로젝트는 높은 확장성과 독립성을 위해 다음과 같은 구조로 설계되었습니다.
 
-```mermaid
+```
 graph TD
     A[Mobile App - Flutter] -->|HTTPS| B[Spring Boot Server]
     B --> C[(PostgreSql)]
@@ -55,5 +55,5 @@ graph TD
     B --> E[Toss Payments]
     B --> F[Social Auth - Clerk + Google/Kakao]
 
-(상세한 데이터 흐름은 서버 기획안의 Flow Diagram 섹션에서 확인 가능합니다.)
+"(상세한 데이터 흐름은 서버 기획안의 Flow Diagram 섹션에서 확인 가능합니다.)"
 ```
